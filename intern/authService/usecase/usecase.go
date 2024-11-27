@@ -22,6 +22,11 @@ func NewAuthUseCase(cfg *config.Config, logger logger.Logger, authRepo authServi
 }
 
 func (uc *authUseCase) GetNewTokens(userInfo *models.UserInfo) (*models.Tokens, error) {
+	err := uc.authRepo.FindAndDeleteToken()
+	if err != nil {
+		return nil, nil
+	}
+
 	return nil, nil
 }
 

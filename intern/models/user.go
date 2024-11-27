@@ -3,8 +3,8 @@ package models
 import "github.com/google/uuid"
 
 type UserInfo struct {
-	userID uuid.UUID
-	ip     int
+	UserID uuid.UUID
+	IP     string
 }
 
 type Tokens struct {

@@ -29,6 +29,7 @@ func (h *authHandler) GetNewTokens(ctx *fiber.Ctx) error {
 	if err != nil {
 		return ctx.JSON(fiber.Map{})
 	}
+
 	tokens, err := h.authUC.GetNewTokens(userInfo)
 	if err != nil {
 
