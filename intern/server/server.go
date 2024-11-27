@@ -3,9 +3,18 @@ package server
 import (
 	"authService/config"
 	loggerimp "authService/pkg/logger"
+	"context"
 	"github.com/jmoiron/sqlx"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
+)
+
+const (
+	serverExitTime = time.Second
 )
 
 type Server struct {
@@ -25,5 +34,22 @@ func NewServer(cfg *config.Config, http *fiber.App, logger loggerimp.Logger, db 
 }
 
 func (s *Server) Run() error {
-	return nil
+	go func() {
+		s.logger.Infof("Server running on port %s", s.cfg.Server.RunningPort)
+		if err := s.http.Listen(s.cfg.Server.RunningPort); err != nil {
+			s.logger.Fatal("Error starting server:", err)
+		}
+	}()
+	s.MapHandlers()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+
+	<-quit
+
+	ctx, shutdown := context.WithTimeout(context.Background(), serverExitTime)
+	defer shutdown()
+
+	s.logger.Info("Server exited properly")
+	return s.http.ShutdownWithContext(ctx)
 }
