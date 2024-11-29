@@ -5,6 +5,7 @@ import (
 	"authService/intern/authService"
 	"authService/intern/models"
 	"authService/pkg/logger"
+	"authService/pkg/utils"
 )
 
 type authUseCase struct {
@@ -22,12 +23,28 @@ func NewAuthUseCase(cfg *config.Config, logger logger.Logger, authRepo authServi
 }
 
 func (uc *authUseCase) GetNewTokens(userInfo *models.UserInfo) (*models.Tokens, error) {
-	err := uc.authRepo.FindAndDeleteToken()
+	err := uc.authRepo.FindAndDeleteToken(userInfo)
 	if err != nil {
 		return nil, nil
 	}
 
-	return nil, nil
+	tokens, err := utils.GenerateTokens(uc.cfg, userInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	refreshTokenRecord := models.NewRefreshTokenRecord(tokens, uc.cfg.Server.RefreshTokenExpiresHourInt)
+	if err = refreshTokenRecord.HashToken(tokens.RefreshToken); err != nil {
+		return nil, err
+	}
+
+	if err = uc.authRepo.WriteRefreshTokenRecord(refreshTokenRecord); err != nil {
+		return nil, err
+	}
+
+	return tokens, nil
 }
 
-func (uc *authUseCase) RefreshTokens() {}
+func (uc *authUseCase) RefreshTokens() {
+
+}

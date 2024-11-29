@@ -6,6 +6,3 @@ type UserInfo struct {
 	UserID uuid.UUID
 	IP     string
 }
-
-type Tokens struct {
-}

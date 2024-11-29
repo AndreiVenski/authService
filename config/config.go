@@ -19,7 +19,10 @@ type PostgresqlConfig struct {
 }
 
 type ServerConfig struct {
-	RunningPort string
+	RunningPort                string
+	JWTSecret                  string
+	AccessTokenExpiresHourInt  int
+	RefreshTokenExpiresHourInt int
 }
 
 func InitConfig(path string) (*Config, error) {
