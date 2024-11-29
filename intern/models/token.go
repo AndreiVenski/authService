@@ -16,8 +16,9 @@ type Tokens struct {
 type RefreshTokenRecord struct {
 	UserID         uuid.UUID
 	RefreshTokenID uuid.UUID
-	HashedToken    string
+	hashedToken    string
 	Expires        time.Time
+	IPAddr         string
 }
 
 func (r *RefreshTokenRecord) HashToken(token string) error {
@@ -26,14 +27,15 @@ func (r *RefreshTokenRecord) HashToken(token string) error {
 		return err
 	}
 
-	r.HashedToken = string(hashed)
+	r.hashedToken = string(hashed)
 	return nil
 }
 
-func NewRefreshTokenRecord(tokens *Tokens, expires int) *RefreshTokenRecord {
+func NewRefreshTokenRecord(tokens *Tokens, expires int, ipaddr string) *RefreshTokenRecord {
 	return &RefreshTokenRecord{
 		UserID:         tokens.UserID,
 		RefreshTokenID: tokens.RefreshTokenID,
 		Expires:        time.Now().Add(time.Duration(expires) * time.Hour),
+		IPAddr:         ipaddr,
 	}
 }
