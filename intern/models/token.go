@@ -7,18 +7,18 @@ import (
 )
 
 type Tokens struct {
-	RefreshToken   string
-	AccessToken    string
-	RefreshTokenID uuid.UUID
-	UserID         uuid.UUID
+	RefreshToken   string    `json:"refresh_token"`
+	AccessToken    string    `json:"access_token"`
+	RefreshTokenID uuid.UUID `json:"refresh_token_id"`
+	UserID         uuid.UUID `json:"user_id"`
 }
 
 type RefreshTokenRecord struct {
-	UserID         uuid.UUID
-	RefreshTokenID uuid.UUID
-	hashedToken    string
-	Expires        time.Time
-	IPAddr         string
+	UserID         uuid.UUID `db:"user_id"`
+	RefreshTokenID uuid.UUID `db:"refresh_token_id"`
+	hashedToken    string    `db:"hashed_token"`
+	Expires        time.Time `db:"expires"`
+	IPAddr         string    `db:"ip_addr"`
 }
 
 func (r *RefreshTokenRecord) HashToken(token string) error {
@@ -29,6 +29,11 @@ func (r *RefreshTokenRecord) HashToken(token string) error {
 
 	r.hashedToken = string(hashed)
 	return nil
+}
+
+func (r *RefreshTokenRecord) VerifyRefreshToken() bool {
+	return false
+
 }
 
 func (r *RefreshTokenRecord) GetHashedToken() string {

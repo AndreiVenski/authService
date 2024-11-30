@@ -4,6 +4,7 @@ import (
 	"authService/intern/authService"
 	"authService/intern/models"
 	"context"
+	"github.com/gofiber/fiber/v2/log"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -19,6 +20,7 @@ func NewAuthRepository(db *sqlx.DB) authService.Repository {
 }
 
 func (r *authRepository) WriteRefreshTokenRecord(ctx context.Context, refreshTokenRecord *models.RefreshTokenRecord) error {
+	log.Info("SOME1:", refreshTokenRecord.GetHashedToken())
 	_, err := r.db.ExecContext(ctx, writeRefreshTokenRecordQuery, refreshTokenRecord.UserID,
 		refreshTokenRecord.RefreshTokenID, refreshTokenRecord.GetHashedToken(),
 		refreshTokenRecord.Expires, refreshTokenRecord.IPAddr)
@@ -27,6 +29,8 @@ func (r *authRepository) WriteRefreshTokenRecord(ctx context.Context, refreshTok
 
 func (r *authRepository) GetRefreshTokenData(ctx context.Context, hashedRefreshToken string) (*models.RefreshTokenRecord, error) {
 	refreshTokenRecord := &models.RefreshTokenRecord{}
+	log.Info("SOME2:", hashedRefreshToken)
+
 	if err := r.db.QueryRowxContext(ctx, getRefreshTokenRecordQuery, hashedRefreshToken).StructScan(refreshTokenRecord); err != nil {
 		return nil, err
 	}

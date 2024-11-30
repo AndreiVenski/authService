@@ -17,6 +17,7 @@ func NewPsqlDB(cfg *config.Config) (*sqlx.DB, error) {
 		cfg.Postgres.PostgresqlDbname,
 		cfg.Postgres.PostgresqlPassword,
 	)
+	fmt.Println(dataSourceName)
 	db, err := sqlx.Connect("pgx", dataSourceName)
 	if err != nil {
 		return nil, err

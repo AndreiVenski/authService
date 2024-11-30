@@ -4,7 +4,7 @@ const (
 	writeRefreshTokenRecordQuery = `INSERT INTO refresh_tokens (user_id, refresh_token_id, hashed_token, expires, ip_addr) 
 									VALUES ($1, $2, $3, $4, $5) `
 
-	getRefreshTokenRecordQuery = `SELECT user_id, refresh_token_id, hashed_token, expires, ip_addr
+	getRefreshTokenRecordQuery = `SELECT user_id, refresh_token_id, expires, ip_addr
 								  FROM refresh_tokens 
 								  WHERE hashed_token = $1`
 

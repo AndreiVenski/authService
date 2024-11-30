@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${POSTGRESQL_USER}
+      - POSTGRES_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRES_DB=${POSTGRESQL_DBNAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRESQL_PORT}:${POSTGRESQL_PORT}"
+    networks:
+      - network1
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRESQL_USER} -d ${POSTGRESQL_DBNAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
+  authservice:
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile
+    container_name: auth_service
+    env_file:
+      - .env
+    ports:
+      - "${SERVER_RUNNINGPORT}:${SERVER_RUNNINGPORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - network1
+    command: [./authservice]
+
+networks:
+  network1:
+    driver: bridge
+
+volumes:
+  postgres_data:

@@ -2,6 +2,7 @@ package server
 
 import (
 	"authService/intern/authService/delivery/http"
+	"authService/intern/authService/email"
 	"authService/intern/authService/repository"
 	"authService/intern/authService/usecase"
 )
@@ -9,7 +10,9 @@ import (
 func (s *Server) MapHandlers() {
 	authRepository := repository.NewAuthRepository(s.db)
 
-	authUseCase := usecase.NewAuthUseCase(s.cfg, s.logger, authRepository)
+	authEmail := email.NewAuthEmail(s.email)
+
+	authUseCase := usecase.NewAuthUseCase(s.cfg, s.logger, authRepository, authEmail)
 
 	authHandler := http.NewAuthHandler(s.cfg, s.logger, authUseCase)
 

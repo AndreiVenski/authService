@@ -6,6 +6,6 @@ import (
 )
 
 func MapAuthRoutes(api fiber.Router, handlers authService.Handler) {
-	api.Post("/tokens")
-	api.Post("/tokens/refresh")
+	api.Post("/tokens", handlers.GetNewTokens)
+	api.Post("/tokens/refresh", handlers.RefreshTokens)
 }

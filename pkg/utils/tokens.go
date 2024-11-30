@@ -60,7 +60,7 @@ func GenerateAccessToken(cfg *config.Config, userInfo *models.UserInfo, refreshT
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
-	tokenString, err := token.SignedString(cfg.Server.JWTSecret)
+	tokenString, err := token.SignedString([]byte(cfg.Server.JWTSecret))
 
 	return tokenString, err
 }

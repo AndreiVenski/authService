@@ -8,6 +8,7 @@ import (
 	"authService/pkg/utils"
 	"context"
 	"errors"
+	"github.com/gofiber/fiber/v2/log"
 	"github.com/google/uuid"
 	"time"
 )
@@ -42,7 +43,7 @@ func (uc *authUseCase) GetNewTokens(ctx context.Context, userInfo *models.UserIn
 	if err = uc.authRepo.WriteRefreshTokenRecord(ctx, refreshTokenRecord); err != nil {
 		return nil, err
 	}
-
+	log.Info("SOME3:", tokens.RefreshToken)
 	return tokens, nil
 }
 
@@ -63,7 +64,7 @@ func (uc *authUseCase) RefreshAccessToken(ctx context.Context, refreshToken, ipA
 
 	if ipAddr != tokenData.IPAddr {
 
-		if err := uc.ipMismatch(ctx, tokenData.UserID); err != nil {
+		if err := uc.ipMismatch(ctx, tokenData.UserID, ipAddr); err != nil {
 
 			return "", err
 		}
@@ -83,12 +84,12 @@ func (uc *authUseCase) RefreshAccessToken(ctx context.Context, refreshToken, ipA
 	return accessToken, nil
 }
 
-func (uc *authUseCase) ipMismatch(ctx context.Context, UserID uuid.UUID) error {
-	user, err := uc.authRepo.GetUser(ctx, UserID)
+func (uc *authUseCase) ipMismatch(ctx context.Context, userID uuid.UUID, ipAddr string) error {
+	user, err := uc.authRepo.GetUser(ctx, userID)
 	if err != nil {
 		return err
 	}
 
-	err = uc.authEmail.SendWarningIPEmail(user)
+	err = uc.authEmail.SendWarningIPEmail(user, ipAddr)
 	return err
 }

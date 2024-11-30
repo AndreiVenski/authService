@@ -2,6 +2,7 @@ package server
 
 import (
 	"authService/config"
+	"authService/intern/emailService"
 	loggerimp "authService/pkg/logger"
 	"context"
 	"github.com/jmoiron/sqlx"
@@ -22,21 +23,24 @@ type Server struct {
 	http   *fiber.App
 	cfg    *config.Config
 	logger loggerimp.Logger
+	email  emailService.EmailService
 }
 
-func NewServer(cfg *config.Config, http *fiber.App, logger loggerimp.Logger, db *sqlx.DB) *Server {
+func NewServer(cfg *config.Config, http *fiber.App, logger loggerimp.Logger, db *sqlx.DB, email emailService.EmailService) *Server {
 	return &Server{
 		db:     db,
 		http:   http,
 		cfg:    cfg,
 		logger: logger,
+		email:  email,
 	}
 }
 
 func (s *Server) Run() error {
 	go func() {
 		s.logger.Infof("Server running on port %s", s.cfg.Server.RunningPort)
-		if err := s.http.Listen(s.cfg.Server.RunningPort); err != nil {
+		s.logger.Info("Port:", s.cfg.Server.RunningPort)
+		if err := s.http.Listen(":" + s.cfg.Server.RunningPort); err != nil {
 			s.logger.Fatal("Error starting server:", err)
 		}
 	}()

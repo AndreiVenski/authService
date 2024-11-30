@@ -24,33 +24,33 @@ func NewAuthHandler(cfg *config.Config, logger logger.Logger, authUC authService
 }
 
 func (h *authHandler) GetNewTokens(ctx *fiber.Ctx) error {
-	var userInfo *models.UserInfo
+	userInfo := &models.UserInfo{}
 	err := utils.ReadFromRequest(ctx, userInfo)
 	if err != nil {
-		return ctx.JSON(fiber.Map{})
+		return ctx.JSON(fiber.Map{"error": err.Error()})
 	}
 
 	tokens, err := h.authUC.GetNewTokens(ctx.Context(), userInfo)
 	if err != nil {
-
+		return ctx.JSON(fiber.Map{"error": err.Error()})
 	}
 
 	return ctx.JSON(fiber.Map{"tokens": tokens})
 }
 
 func (h *authHandler) RefreshTokens(ctx *fiber.Ctx) error {
-	var refreshToken struct {
-		token string
-	}
+	refreshToken := &struct {
+		Token string `json:"refresh_token"`
+	}{}
 
 	err := utils.ReadFromRequest(ctx, refreshToken)
 	if err != nil {
-
+		return ctx.JSON(fiber.Map{"error": err.Error()})
 	}
 
-	tokens, err := h.authUC.RefreshAccessToken(ctx.Context(), refreshToken.token, ctx.IP())
+	tokens, err := h.authUC.RefreshAccessToken(ctx.Context(), refreshToken.Token, ctx.IP())
 	if err != nil {
-
+		return ctx.JSON(fiber.Map{"error": err.Error()})
 	}
 
 	return ctx.JSON(fiber.Map{"tokens": tokens})

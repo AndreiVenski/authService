@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"authService/config"
 	"go.uber.org/zap"
 )
 
@@ -17,13 +16,10 @@ type Logger interface {
 
 type ApiLogger struct {
 	suggarLogger *zap.SugaredLogger
-	cfg          *config.Config
 }
 
-func NewApiLogger(cfg *config.Config) *ApiLogger {
-	return &ApiLogger{
-		cfg: cfg,
-	}
+func NewApiLogger() *ApiLogger {
+	return &ApiLogger{}
 }
 
 func (l *ApiLogger) InitLogger() {
