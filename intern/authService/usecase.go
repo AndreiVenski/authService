@@ -1,8 +1,11 @@
 package authService
 
-import "authService/intern/models"
+import (
+	"authService/intern/models"
+	"context"
+)
 
 type UseCase interface {
-	GetNewTokens(userInfo *models.UserInfo) (*models.Tokens, error)
-	RefreshAccessToken(refreshToken, ipAddr string) (*models.Tokens, error)
+	GetNewTokens(ctx context.Context, userInfo *models.UserInfo) (*models.Tokens, error)
+	RefreshAccessToken(ctx context.Context, refreshToken, ipAddr string) (string, error)
 }

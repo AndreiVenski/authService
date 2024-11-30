@@ -6,6 +6,7 @@ import (
 	"authService/intern/models"
 	"authService/pkg/logger"
 	"authService/pkg/utils"
+	"context"
 	"errors"
 	"github.com/google/uuid"
 	"time"
@@ -27,7 +28,7 @@ func NewAuthUseCase(cfg *config.Config, logger logger.Logger, authRepo authServi
 	}
 }
 
-func (uc *authUseCase) GetNewTokens(userInfo *models.UserInfo) (*models.Tokens, error) {
+func (uc *authUseCase) GetNewTokens(ctx context.Context, userInfo *models.UserInfo) (*models.Tokens, error) {
 	tokens, err := utils.GenerateTokens(uc.cfg, userInfo)
 	if err != nil {
 		return nil, err
@@ -38,50 +39,52 @@ func (uc *authUseCase) GetNewTokens(userInfo *models.UserInfo) (*models.Tokens, 
 		return nil, err
 	}
 
-	if err = uc.authRepo.WriteRefreshTokenRecord(refreshTokenRecord); err != nil {
+	if err = uc.authRepo.WriteRefreshTokenRecord(ctx, refreshTokenRecord); err != nil {
 		return nil, err
 	}
 
 	return tokens, nil
 }
 
-func (uc *authUseCase) RefreshAccessToken(refreshToken, ipAddr string) (*models.Tokens, error) {
-	tokenData, err := uc.authRepo.GetRefreshTokenData(refreshToken)
+func (uc *authUseCase) RefreshAccessToken(ctx context.Context, refreshToken, ipAddr string) (string, error) {
+	refreshTokenRecord := &models.RefreshTokenRecord{}
+	if err := refreshTokenRecord.HashToken(refreshToken); err != nil {
+		return "", err
+	}
+
+	tokenData, err := uc.authRepo.GetRefreshTokenData(ctx, refreshTokenRecord.GetHashedToken())
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	if time.Now().After(tokenData.Expires) {
-		return nil, errors.New("token expires")
+		return "", errors.New("token expires")
 	}
 
 	if ipAddr != tokenData.IPAddr {
 
-		if err := uc.ipMismatch(tokenData.UserID); err != nil {
+		if err := uc.ipMismatch(ctx, tokenData.UserID); err != nil {
 
-			return nil, err
+			return "", err
 		}
 	}
 
 	userInfo := &models.UserInfo{UserID: tokenData.UserID, IP: ipAddr}
-	tokens, err := utils.GenerateTokens(uc.cfg, userInfo)
+	newRefreshTokenID := uuid.New()
+	accessToken, err := utils.GenerateAccessToken(uc.cfg, userInfo, newRefreshTokenID)
 	if err != nil {
-		return nil, err
-	}
-	refreshTokenRecord := models.NewRefreshTokenRecord(tokens, uc.cfg.Server.RefreshTokenExpiresHourInt, ipAddr)
-	if err = refreshTokenRecord.HashToken(tokens.RefreshToken); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	if err = uc.authRepo.UpdateRefreshTokenRecord(refreshTokenRecord); err != nil {
-		return nil, err
+	if err = uc.authRepo.UpdateRefreshTokenID(ctx, refreshTokenRecord.GetHashedToken(), newRefreshTokenID); err != nil {
+		return "", err
 	}
 
-	return tokens, nil
+	return accessToken, nil
 }
 
-func (uc *authUseCase) ipMismatch(UserID uuid.UUID) error {
-	user, err := uc.authRepo.GetUser(UserID)
+func (uc *authUseCase) ipMismatch(ctx context.Context, UserID uuid.UUID) error {
+	user, err := uc.authRepo.GetUser(ctx, UserID)
 	if err != nil {
 		return err
 	}

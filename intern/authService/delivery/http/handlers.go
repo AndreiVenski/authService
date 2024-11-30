@@ -30,7 +30,7 @@ func (h *authHandler) GetNewTokens(ctx *fiber.Ctx) error {
 		return ctx.JSON(fiber.Map{})
 	}
 
-	tokens, err := h.authUC.GetNewTokens(userInfo)
+	tokens, err := h.authUC.GetNewTokens(ctx.Context(), userInfo)
 	if err != nil {
 
 	}
@@ -48,7 +48,7 @@ func (h *authHandler) RefreshTokens(ctx *fiber.Ctx) error {
 
 	}
 
-	tokens, err := h.authUC.RefreshAccessToken(refreshToken.token, ctx.IP())
+	tokens, err := h.authUC.RefreshAccessToken(ctx.Context(), refreshToken.token, ctx.IP())
 	if err != nil {
 
 	}

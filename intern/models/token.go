@@ -31,6 +31,10 @@ func (r *RefreshTokenRecord) HashToken(token string) error {
 	return nil
 }
 
+func (r *RefreshTokenRecord) GetHashedToken() string {
+	return r.hashedToken
+}
+
 func NewRefreshTokenRecord(tokens *Tokens, expires int, ipaddr string) *RefreshTokenRecord {
 	return &RefreshTokenRecord{
 		UserID:         tokens.UserID,

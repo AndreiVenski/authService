@@ -2,12 +2,13 @@ package authService
 
 import (
 	"authService/intern/models"
+	"context"
 	"github.com/google/uuid"
 )
 
 type Repository interface {
-	WriteRefreshTokenRecord(refreshTokenRecord *models.RefreshTokenRecord) error
-	GetRefreshTokenData(refreshToken string) (*models.RefreshTokenRecord, error)
-	UpdateRefreshTokenRecord(refreshTokenRecord *models.RefreshTokenRecord) error
-	GetUser(userID uuid.UUID) (*models.User, error)
+	WriteRefreshTokenRecord(ctx context.Context, refreshTokenRecord *models.RefreshTokenRecord) error
+	GetRefreshTokenData(ctx context.Context, hashedRefreshToken string) (*models.RefreshTokenRecord, error)
+	UpdateRefreshTokenID(ctx context.Context, hashedRefreshToken string, refreshTokenID uuid.UUID) error
+	GetUser(ctx context.Context, userID uuid.UUID) (*models.User, error)
 }
