@@ -4,9 +4,10 @@ import (
 	"authService/intern/authService"
 	"authService/intern/models"
 	"context"
-	"github.com/gofiber/fiber/v2/log"
+	"database/sql"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 )
 
 type authRepository struct {
@@ -20,32 +21,50 @@ func NewAuthRepository(db *sqlx.DB) authService.Repository {
 }
 
 func (r *authRepository) WriteRefreshTokenRecord(ctx context.Context, refreshTokenRecord *models.RefreshTokenRecord) error {
-	log.Info("SOME1:", refreshTokenRecord.GetHashedToken())
 	_, err := r.db.ExecContext(ctx, writeRefreshTokenRecordQuery, refreshTokenRecord.UserID,
 		refreshTokenRecord.RefreshTokenID, refreshTokenRecord.GetHashedToken(),
 		refreshTokenRecord.Expires, refreshTokenRecord.IPAddr)
-	return err
+	if err != nil {
+		return errors.Wrap(err, "authRepository.WriteRefreshTokenRecord.ExecContext")
+	}
+	return nil
 }
 
-func (r *authRepository) GetRefreshTokenData(ctx context.Context, hashedRefreshToken string) (*models.RefreshTokenRecord, error) {
+func (r *authRepository) GetRefreshTokenData(ctx context.Context, refreshTokenID uuid.UUID) (*models.RefreshTokenRecord, error) {
 	refreshTokenRecord := &models.RefreshTokenRecord{}
-	log.Info("SOME2:", hashedRefreshToken)
-
-	if err := r.db.QueryRowxContext(ctx, getRefreshTokenRecordQuery, hashedRefreshToken).StructScan(refreshTokenRecord); err != nil {
-		return nil, err
+	var hashedToken string
+	if err := r.db.QueryRowxContext(ctx, getRefreshTokenRecordQuery, refreshTokenID.String()).Scan(
+		&refreshTokenRecord.UserID,
+		&refreshTokenRecord.RefreshTokenID,
+		&hashedToken,
+		&refreshTokenRecord.Expires,
+		&refreshTokenRecord.IPAddr,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.Wrap(sql.ErrNoRows, "refresh token not found")
+		}
+		return nil, errors.Wrap(err, "authRepository.GetRefreshTokenData.Scan")
 	}
+	refreshTokenRecord.WriteToken(hashedToken)
+
 	return refreshTokenRecord, nil
 }
 
-func (r *authRepository) UpdateRefreshTokenID(ctx context.Context, hashedRefreshToken string, refreshTokenID uuid.UUID) error {
-	_, err := r.db.ExecContext(ctx, updateRefreshTokenIDQuery, refreshTokenID.String(), hashedRefreshToken)
-	return err
+func (r *authRepository) UpdateRefreshTokenID(ctx context.Context, refreshTokenID, newRefreshTokenID uuid.UUID) error {
+	_, err := r.db.ExecContext(ctx, updateRefreshTokenIDQuery, newRefreshTokenID.String(), refreshTokenID.String())
+	if err != nil {
+		return errors.Wrap(err, "authRepository.UpdateRefreshTokenID.ExecContext")
+	}
+	return nil
 }
 
 func (r *authRepository) GetUser(ctx context.Context, userID uuid.UUID) (*models.User, error) {
 	user := &models.User{}
 	if err := r.db.QueryRowxContext(ctx, getUserQuery, userID.String()).StructScan(user); err != nil {
-		return nil, err
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.Wrap(sql.ErrNoRows, "user not found")
+		}
+		return nil, errors.Wrap(err, "authRepository.GetUser.StructScan")
 	}
 	return user, nil
 }

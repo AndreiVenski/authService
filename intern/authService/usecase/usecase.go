@@ -7,9 +7,9 @@ import (
 	"authService/pkg/logger"
 	"authService/pkg/utils"
 	"context"
-	"errors"
-	"github.com/gofiber/fiber/v2/log"
+
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	"time"
 )
 
@@ -32,41 +32,38 @@ func NewAuthUseCase(cfg *config.Config, logger logger.Logger, authRepo authServi
 func (uc *authUseCase) GetNewTokens(ctx context.Context, userInfo *models.UserInfo) (*models.Tokens, error) {
 	tokens, err := utils.GenerateTokens(uc.cfg, userInfo)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "authUseCase.GetNewTokens.GenerateTokens")
 	}
 
 	refreshTokenRecord := models.NewRefreshTokenRecord(tokens, uc.cfg.Server.RefreshTokenExpiresHourInt, userInfo.IP)
 	if err = refreshTokenRecord.HashToken(tokens.RefreshToken); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "authUseCase.GetNewTokens.HashToken")
 	}
 
 	if err = uc.authRepo.WriteRefreshTokenRecord(ctx, refreshTokenRecord); err != nil {
 		return nil, err
 	}
-	log.Info("SOME3:", tokens.RefreshToken)
+
 	return tokens, nil
 }
 
-func (uc *authUseCase) RefreshAccessToken(ctx context.Context, refreshToken, ipAddr string) (string, error) {
-	refreshTokenRecord := &models.RefreshTokenRecord{}
-	if err := refreshTokenRecord.HashToken(refreshToken); err != nil {
-		return "", err
-	}
-
-	tokenData, err := uc.authRepo.GetRefreshTokenData(ctx, refreshTokenRecord.GetHashedToken())
+func (uc *authUseCase) RefreshAccessToken(ctx context.Context, refreshToken string, refreshTokenID uuid.UUID, ipAddr string) (string, string, error) {
+	tokenData, err := uc.authRepo.GetRefreshTokenData(ctx, refreshTokenID)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	if time.Now().After(tokenData.Expires) {
-		return "", errors.New("token expires")
+		return "", "", errors.New("token expires")
+	}
+
+	if !tokenData.VerifyRefreshToken(refreshToken) {
+		return "", "", errors.New("token is incorrect")
 	}
 
 	if ipAddr != tokenData.IPAddr {
-
-		if err := uc.ipMismatch(ctx, tokenData.UserID, ipAddr); err != nil {
-
-			return "", err
+		if err = uc.ipMismatch(ctx, tokenData.UserID, ipAddr); err != nil {
+			return "", "", err
 		}
 	}
 
@@ -74,14 +71,14 @@ func (uc *authUseCase) RefreshAccessToken(ctx context.Context, refreshToken, ipA
 	newRefreshTokenID := uuid.New()
 	accessToken, err := utils.GenerateAccessToken(uc.cfg, userInfo, newRefreshTokenID)
 	if err != nil {
-		return "", err
+		return "", "", errors.Wrap(err, "authUseCase.RefreshAccessToken.GenerateAcceessToken")
 	}
 
-	if err = uc.authRepo.UpdateRefreshTokenID(ctx, refreshTokenRecord.GetHashedToken(), newRefreshTokenID); err != nil {
-		return "", err
+	if err = uc.authRepo.UpdateRefreshTokenID(ctx, refreshTokenID, newRefreshTokenID); err != nil {
+		return "", "", err
 	}
 
-	return accessToken, nil
+	return accessToken, newRefreshTokenID.String(), nil
 }
 
 func (uc *authUseCase) ipMismatch(ctx context.Context, userID uuid.UUID, ipAddr string) error {

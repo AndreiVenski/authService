@@ -13,9 +13,10 @@ type MockEmailService struct {
 	logger logger.Logger
 }
 
-func NewMockEmailService() emailService.EmailService {
+func NewMockEmailService(logger1 logger.Logger) emailService.EmailService {
 	return &MockEmailService{
 		emails: make(map[string][]models.Email),
+		logger: logger1,
 	}
 }
 

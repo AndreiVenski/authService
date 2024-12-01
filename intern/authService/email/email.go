@@ -5,6 +5,7 @@ import (
 	"authService/intern/emailService"
 	"authService/intern/models"
 	"fmt"
+	"github.com/pkg/errors"
 )
 
 type authEmail struct {
@@ -25,7 +26,7 @@ func (e *authEmail) SendWarningIPEmail(user *models.User, ipAddr string) error {
 
 	err := e.emailService.Send(email)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "authEmail.SendWarningIPEmail.Send")
 	}
 	return nil
 }

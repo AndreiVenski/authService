@@ -13,7 +13,6 @@ import (
 )
 
 func main() {
-
 	loggerApi := logger.NewApiLogger()
 	loggerApi.InitLogger()
 
@@ -36,9 +35,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	email := mocks.NewMockEmailService()
+	email := mocks.NewMockEmailService(loggerApi)
 
-	fiberApp := fiber.New()
+	fiberApp := fiber.New(fiber.Config{
+		EnableTrustedProxyCheck: false,
+	})
 	server := server2.NewServer(cfg, fiberApp, loggerApi, db, email)
 
 	if err = server.Run(); err != nil {

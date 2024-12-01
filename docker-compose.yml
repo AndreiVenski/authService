@@ -39,6 +39,7 @@ services:
       - network1
     command: [./authservice]
 
+
 networks:
   network1:
     driver: bridge

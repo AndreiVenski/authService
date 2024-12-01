@@ -9,6 +9,6 @@ type User struct {
 }
 
 type UserInfo struct {
-	UserID uuid.UUID `json:"user_id"`
+	UserID uuid.UUID `json:"user_id" validate:"required,uuid4"`
 	IP     string    `json:"ip_addr"`
 }

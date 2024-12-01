@@ -31,9 +31,12 @@ func (r *RefreshTokenRecord) HashToken(token string) error {
 	return nil
 }
 
-func (r *RefreshTokenRecord) VerifyRefreshToken() bool {
-	return false
+func (r *RefreshTokenRecord) WriteToken(token string) {
+	r.hashedToken = token
+}
 
+func (r *RefreshTokenRecord) VerifyRefreshToken(token string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(r.hashedToken), []byte(token)) == nil
 }
 
 func (r *RefreshTokenRecord) GetHashedToken() string {
