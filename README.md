@@ -8,7 +8,7 @@
     └── config.go - чтение файла .env и запись переменных окружения в Config{}
     docker:
     └── Dockerfile
-    intern:
+    internal:
     ├── authService:
     │   ├── delivery - реализация handlers и роутеров
     │   ├── repository - реализация authRepository для работы с db
