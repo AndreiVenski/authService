@@ -8,7 +8,6 @@ import (
 	"authService/pkg/logger"
 	"authService/pkg/utils"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
 
@@ -32,6 +31,17 @@ func respondWithError(ctx *fiber.Ctx, code int, message string) error {
 	})
 }
 
+// @Summary Get New Tokens
+// @Description Get new tokens : access and refresh
+// @ID getNewTokens
+// @Accept json
+// @Produce json
+// @Param X-Forwarded-For header string false "User's IP Address"
+// @Param request body models.GetNewTokenData true "User Info"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /tokens [post]
 func (h *authHandler) GetNewTokens(ctx *fiber.Ctx) error {
 	userInfo := &models.UserInfo{}
 	err := utils.ReadFromRequest(ctx, userInfo)
@@ -44,7 +54,7 @@ func (h *authHandler) GetNewTokens(ctx *fiber.Ctx) error {
 		ip = ctx.IP()
 	}
 	userInfo.IP = ip
-	tokens, err := h.authUC.GetNewTokens(ctx.Context(), userInfo)
+	tokens, err := h.authUC.GetNewTokens(ctx.UserContext(), userInfo)
 	if err != nil {
 		h.logger.Errorf("Failed to get new tokens: %v", err)
 		return respondWithError(ctx, fiber.StatusInternalServerError, "Could not generate tokens")
@@ -53,11 +63,20 @@ func (h *authHandler) GetNewTokens(ctx *fiber.Ctx) error {
 	return ctx.JSON(fiber.Map{"tokens": tokens})
 }
 
+// @Summary Refresh Tokens
+// @Description Refresh access token
+// @ID refreshToken
+// @Accept json
+// @Produce json
+// @Param X-Forwarded-For header string false "User's IP Address"
+// @Param request body models.RefreshData true "Refresh Token Data"
+// @Success 200 {object} models.TokenResponse
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /tokens/refresh [post]
 func (h *authHandler) RefreshTokens(ctx *fiber.Ctx) error {
-	refreshToken := &struct {
-		Token   string    `json:"refresh_token" validate:"required,base64,len=44"`
-		TokenID uuid.UUID `json:"refresh_token_id" validate:"required,uuid4"`
-	}{}
+	refreshToken := &models.RefreshData{}
 
 	err := utils.ReadFromRequest(ctx, refreshToken)
 	if err != nil {
@@ -70,7 +89,7 @@ func (h *authHandler) RefreshTokens(ctx *fiber.Ctx) error {
 		ip = ctx.IP()
 	}
 
-	token, newRefreshTokenID, err := h.authUC.RefreshAccessToken(ctx.Context(), refreshToken.Token, refreshToken.TokenID, ip)
+	token, newRefreshTokenID, err := h.authUC.RefreshAccessToken(ctx.UserContext(), refreshToken.Token, refreshToken.TokenID, ip)
 	if err != nil {
 		switch {
 		case errors.Is(err, httpErrors.ErrRefreshTokenExpires),

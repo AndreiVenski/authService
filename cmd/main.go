@@ -1,17 +1,24 @@
 package main
 
 import (
+	_ "authService/api/docs"
 	"authService/config"
 	"authService/intern/emailService/mocks"
 	server2 "authService/intern/server"
 	"authService/pkg/db/postgres_conn"
 	"authService/pkg/logger"
-	"os"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/pressly/goose/v3"
+	"os"
 )
 
+// @title AuthService API
+// @version 1.0
+// @description This is API for AuthService
+// @contact.name Andrei Venski
+// @contact.url https://github.com/andrew967
+// @contact.email venskiandrei32@gmail.com
+// @BasePath /api/v1/auth
 func main() {
 	loggerApi := logger.NewApiLogger()
 	loggerApi.InitLogger()

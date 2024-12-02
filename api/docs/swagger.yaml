@@ -1,0 +1,114 @@
+basePath: /api/v1/auth
+definitions:
+  models.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  models.GetNewTokenData:
+    properties:
+      user_id:
+        type: string
+    type: object
+  models.RefreshData:
+    properties:
+      refresh_token:
+        type: string
+      refresh_token_id:
+        type: string
+    required:
+    - refresh_token
+    - refresh_token_id
+    type: object
+  models.TokenResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token_id:
+        type: string
+    type: object
+info:
+  contact:
+    email: venskiandrei32@gmail.com
+    name: Andrei Venski
+    url: https://github.com/andrew967
+  description: This is API for AuthService
+  title: AuthService API
+  version: "1.0"
+paths:
+  /tokens:
+    post:
+      consumes:
+      - application/json
+      description: 'Get new tokens : access and refresh'
+      operationId: getNewTokens
+      parameters:
+      - description: User's IP Address
+        in: header
+        name: X-Forwarded-For
+        type: string
+      - description: User Info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.GetNewTokenData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get New Tokens
+  /tokens/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh access token
+      operationId: refreshToken
+      parameters:
+      - description: User's IP Address
+        in: header
+        name: X-Forwarded-For
+        type: string
+      - description: Refresh Token Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.RefreshData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Refresh Tokens
+swagger: "2.0"

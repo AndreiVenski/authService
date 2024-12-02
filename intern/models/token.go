@@ -13,6 +13,22 @@ type Tokens struct {
 	UserID         uuid.UUID `json:"user_id"`
 }
 
+type RefreshData struct {
+	Token   string    `json:"refresh_token" validate:"required,base64,len=44"`
+	TokenID uuid.UUID `json:"refresh_token_id" validate:"required,uuid4"`
+}
+
+// Only for swagger used
+type GetNewTokenData struct {
+	UserID uuid.UUID `json:"user_id"`
+}
+
+// Only for swagger used
+type TokenResponse struct {
+	AccessToken    string `json:"access_token"`
+	RefreshTokenID string `json:"refresh_token_id"`
+}
+
 type RefreshTokenRecord struct {
 	UserID         uuid.UUID `db:"user_id"`
 	RefreshTokenID uuid.UUID `db:"refresh_token_id"`
