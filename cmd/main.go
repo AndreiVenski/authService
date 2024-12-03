@@ -3,8 +3,8 @@ package main
 import (
 	_ "authService/api/docs"
 	"authService/config"
-	"authService/intern/emailService/mocks"
-	server2 "authService/intern/server"
+	"authService/internal/emailService/mocks"
+	server2 "authService/internal/server"
 	"authService/pkg/db/postgres_conn"
 	"authService/pkg/logger"
 	"github.com/gofiber/fiber/v2"

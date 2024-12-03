@@ -2,7 +2,7 @@ package utils
 
 import (
 	"authService/config"
-	"authService/intern/models"
+	"authService/internal/models"
 	"crypto/rand"
 	"encoding/base64"
 	"github.com/golang-jwt/jwt/v5"

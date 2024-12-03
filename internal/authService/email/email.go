@@ -1,9 +1,9 @@
 package email
 
 import (
-	"authService/intern/authService"
-	"authService/intern/emailService"
-	"authService/intern/models"
+	"authService/internal/authService"
+	"authService/internal/emailService"
+	"authService/internal/models"
 	"fmt"
 	"github.com/pkg/errors"
 )

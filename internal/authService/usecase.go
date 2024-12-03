@@ -1,7 +1,7 @@
 package authService
 
 import (
-	"authService/intern/models"
+	"authService/internal/models"
 	"context"
 	"github.com/google/uuid"
 )

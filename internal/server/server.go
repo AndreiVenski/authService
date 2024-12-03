@@ -2,7 +2,7 @@ package server
 
 import (
 	"authService/config"
-	"authService/intern/emailService"
+	"authService/internal/emailService"
 	loggerimp "authService/pkg/logger"
 	"context"
 	"github.com/jmoiron/sqlx"

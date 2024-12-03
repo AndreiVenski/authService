@@ -1,7 +1,7 @@
 package mocks
 
 import (
-	"authService/intern/models"
+	"authService/internal/models"
 	"github.com/stretchr/testify/mock"
 )
 

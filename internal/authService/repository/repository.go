@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"authService/intern/authService"
-	"authService/intern/models"
+	"authService/internal/authService"
+	"authService/internal/models"
 	"context"
 	"database/sql"
 	"github.com/google/uuid"

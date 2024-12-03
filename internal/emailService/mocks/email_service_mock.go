@@ -1,8 +1,8 @@
 package mocks
 
 import (
-	"authService/intern/emailService"
-	"authService/intern/models"
+	"authService/internal/emailService"
+	"authService/internal/models"
 	"authService/pkg/logger"
 	"sync"
 )

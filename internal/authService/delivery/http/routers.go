@@ -1,7 +1,7 @@
 package http
 
 import (
-	"authService/intern/authService"
+	"authService/internal/authService"
 	"github.com/gofiber/fiber/v2"
 )
 

@@ -2,8 +2,8 @@ package http
 
 import (
 	"authService/config"
-	"authService/intern/authService"
-	"authService/intern/models"
+	"authService/internal/authService"
+	"authService/internal/models"
 	"authService/pkg/httpErrors"
 	"authService/pkg/logger"
 	"authService/pkg/utils"

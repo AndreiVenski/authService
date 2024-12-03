@@ -1,10 +1,10 @@
 package server
 
 import (
-	"authService/intern/authService/delivery/http"
-	"authService/intern/authService/email"
-	"authService/intern/authService/repository"
-	"authService/intern/authService/usecase"
+	"authService/internal/authService/delivery/http"
+	"authService/internal/authService/email"
+	"authService/internal/authService/repository"
+	"authService/internal/authService/usecase"
 	"github.com/gofiber/swagger"
 )
 

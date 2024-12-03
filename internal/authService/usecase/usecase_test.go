@@ -2,8 +2,8 @@ package usecase
 
 import (
 	"authService/config"
-	"authService/intern/authService/mocks"
-	"authService/intern/models"
+	"authService/internal/authService/mocks"
+	"authService/internal/models"
 	"context"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"

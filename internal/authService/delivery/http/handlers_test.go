@@ -2,8 +2,8 @@ package http
 
 import (
 	"authService/config"
-	"authService/intern/authService/mocks"
-	"authService/intern/models"
+	"authService/internal/authService/mocks"
+	"authService/internal/models"
 	"bytes"
 	"encoding/base64"
 	"encoding/json"

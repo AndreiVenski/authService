@@ -2,8 +2,8 @@ package usecase
 
 import (
 	"authService/config"
-	"authService/intern/authService"
-	"authService/intern/models"
+	"authService/internal/authService"
+	"authService/internal/models"
 	"authService/pkg/logger"
 	"authService/pkg/utils"
 	"context"
