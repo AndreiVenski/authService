@@ -28,7 +28,6 @@ func main() {
 		loggerApi.Error("Config init failed", err)
 		os.Exit(1)
 	}
-	loggerApi.Info("DB_NAME:", cfg.Postgres.PostgresqlDbname, " username:", cfg.Postgres.PostgresqlUser)
 
 	db, err := postgres_conn.NewPsqlDB(cfg)
 	if err != nil {

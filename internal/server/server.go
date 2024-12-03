@@ -39,7 +39,6 @@ func NewServer(cfg *config.Config, http *fiber.App, logger loggerimp.Logger, db 
 func (s *Server) Run() error {
 	go func() {
 		s.logger.Infof("Server running on port %s", s.cfg.Server.RunningPort)
-		s.logger.Info("Port:", s.cfg.Server.RunningPort)
 		if err := s.http.Listen(":" + s.cfg.Server.RunningPort); err != nil {
 			s.logger.Fatal("Error starting server:", err)
 		}
